@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MinecraftHost - Zarządzaj swoimi serwerami</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+        .container-main { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        
+        /* Header & Nav */
+        header {
+            background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+            padding: 20px 0;
+            border-bottom: 3px solid #3b82f6;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
+        }
+        .header-content {
+            max-width: 1400px; margin: 0 auto; padding: 0 20px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo { display: flex; align-items: center; gap: 15px; font-size: 24px; font-weight: bold; color: white; }
+        .nav-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+        
+        nav button {
+            padding: 10px 18px; background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3); color: white;
+            border-radius: 8px; cursor: pointer; transition: all 0.3s;
+        }
+        nav button.active { background: white; color: #2563eb; font-weight: bold; }
+
+        /* Sections */
+        .section { display: none; animation: fadeIn 0.4s ease; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Cards & Components */
+        .card, .docker-container, .server-card {
+            background: rgba(30, 41, 59, 0.7);
+            border: 2px solid #334155; border-radius: 12px;
+            padding: 20px; transition: all 0.3s;
+        }
+        .server-card:hover { border-color: #3b82f6; transform: translateY(-3px); }
+        
+        .status-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        .online { background: #10b981; box-shadow: 0 0 10px #10b981; }
+        .offline { background: #ef4444; }
+
+        /* Grid Layouts */
+        .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .stat-box { background: #1e40af; padding: 20px; border-radius: 10px; text-align: center; }
+        .servers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+
+        /* Form elements */
+        input, select, textarea {
+            width: 100%; padding: 12px; background: #0f172a; 
+            border: 1px solid #334155; border-radius: 8px; color: white; margin-top: 5px;
+        }
+
+        /* Console */
+        .console-box {
+            background: #000; color: #00ff00; font-family: monospace;
+            padding: 15px; height: 300px; overflow-y: auto; border-radius: 8px;
+            border: 2px solid #334155; font-size: 13px;
+        }
+        
+        .btn { padding: 10px 20px; border-radius: 8px; cursor: pointer; border: none; font-weight: 600; transition: 0.2s; }
+        .btn-blue { background: #3b82f6; color: white; }
+        .btn-green { background: #10b981; color: white; }
+        .btn-red { background: #ef4444; color: white; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-content">
+        <div class="logo"><i class="fas fa-cube"></i> MinecraftHost</div>
+        <nav class="nav-buttons">
+            <button class="nav-btn active" data-section="dash"><i class="fas fa-home"></i> Główna</button>
+            <button class="nav-btn" data-section="srv"><i class="fas fa-server"></i> Moje Serwery</button>
+            <button class="nav-btn" data-section="console-sec"><i class="fas fa-terminal"></i> Konsola</button>
+            <button class="nav-btn" data-section="files-sec"><i class="fas fa-folder"></i> Pliki</button>
+            <button class="nav-btn" data-section="set-sec"><i class="fas fa-cog"></i> Ustawienia</button>
+        </nav>
+    </div>
+</header>
+
+<div class="container-main">
+
+    <div id="dash" class="section active">
+        <div class="grid-stats">
+            <div class="stat-box"><h3>12</h3><p>Graczy</p></div>
+            <div class="stat-box"><h3>2</h3><p>Serwery</p></div>
+            <div class="stat-box"><h3>99%</h3><p>Uptime</p></div>
+            <div class="stat-box"><h3>1.2 GB</h3><p>RAM</p></div>
+        </div>
+        
+        <div class="docker-container">
+            <h2 class="text-xl font-bold mb-4"><i class="fas fa-plus-circle"></i> Szybkie tworzenie serwera</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label>Nazwa serwera</label>
+                    <input type="text" id="newSrvName" placeholder="Np. Survival Pl">
+                </div>
+                <div>
+                    <label>Silnik</label>
+                    <select id="newSrvEngine">
+                        <option value="Paper">PaperMC</option>
+                        <option value="Purpur">Purpur</option>
+                        <option value="Forge">Forge</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Wersja</label>
+                    <select id="newSrvVer">
+                        <option>1.20.4</option>
+                        <option>1.16.5</option>
+                        <option>1.8.8</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn btn-green mt-4 w-full" onclick="createNewServer()">Uruchom nową maszynę</button>
+        </div>
+    </div>
+
+    <div id="srv" class="section">
+        <h2 class="text-2xl font-bold mb-6">Aktywne Kontenery Docker</h2>
+        <div class="servers-grid" id="srvList">
+            <div class="server-card">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-sm text-blue-400 font-mono">ID: a7f12</span>
+                    <span class="online p-1 rounded text-xs text-white"><div class="status-dot online"></div>RUNNING</span>
+                </div>
+                <h3 class="text-lg font-bold">Główny Serwer</h3>
+                <p class="text-gray-400 text-sm">Port: 25565 | Wersja: 1.20.4</p>
+                <div class="flex gap-2 mt-4">
+                    <button class="btn btn-red flex-1 text-xs">STOP</button>
+                    <button class="btn btn-blue flex-1 text-xs">RESTART</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="console-sec" class="section">
+        <h2 class="text-2xl font-bold mb-4">Live Konsola</h2>
+        <div class="console-box" id="consoleOutput">
+            <div>[12:00:01] [Server thread/INFO]: Starting minecraft server version 1.20.4</div>
+            <div>[12:00:05] [Server thread/INFO]: Loading properties</div>
+            <div>[12:00:10] [Server thread/INFO]: Done (12.4s)! For help, type "help"</div>
+        </div>
+        <div class="flex gap-2 mt-2">
+            <input type="text" id="cmdInput" placeholder="Wpisz komendę..." style="margin-top:0">
+            <button class="btn btn-blue" onclick="sendToConsole()">Wyślij</button>
+        </div>
+    </div>
+
+    <div id="files-sec" class="section">
+        <h2 class="text-2xl font-bold mb-4">Menedżer Plików (SFTP)</h2>
+        <div class="card">
+            <div class="border-b border-gray-700 pb-2 mb-2 flex justify-between">
+                <span>Nazwa pliku</span>
+                <span>Rozmiar</span>
+            </div>
+            <div class="flex justify-between p-2 hover:bg-gray-800 rounded cursor-pointer">
+                <span><i class="fas fa-folder text-yellow-500 mr-2"></i> plugins</span>
+                <span class="text-gray-500">DIR</span>
+            </div>
+            <div class="flex justify-between p-2 hover:bg-gray-800 rounded cursor-pointer">
+                <span><i class="fas fa-file-alt text-blue-400 mr-2"></i> server.properties</span>
+                <span class="text-gray-500">4 KB</span>
+            </div>
+            <div class="flex justify-between p-2 hover:bg-gray-800 rounded cursor-pointer">
+                <span><i class="fas fa-file-code text-green-400 mr-2"></i> spigot.yml</span>
+                <span class="text-gray-500">12 KB</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="set-sec" class="section">
+        <h2 class="text-2xl font-bold mb-4">Ustawienia Serwera</h2>
+        <div class="card max-w-lg">
+            <label>Zmień wersję silnika</label>
+            <select onchange="alert('Wersja zostanie zmieniona po restarcie!')">
+                <option>1.20.4 (Aktualna)</option>
+                <option>1.21.0</option>
+                <option>1.19.2</option>
+            </select>
+            <div class="mt-4">
+                <label>Alokacja RAM (GB)</label>
+                <input type="range" min="1" max="16" value="4" class="w-full" oninput="ramVal.innerText = this.value">
+                <p class="text-sm mt-1">Wybrano: <span id="ramVal">4</span> GB</p>
+            </div>
+            <button class="btn btn-blue mt-6 w-full">Zapisz ustawienia</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // --- NAWIGACJA ---
+    const navBtns = document.querySelectorAll('.nav-btn');
+    const sections = document.querySelectorAll('.section');
+
+    navBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            navBtns.forEach(b => b.classList.remove('active'));
+            sections.forEach(s => s.classList.remove('active'));
+            
+            btn.classList.add('active');
+            const secId = btn.getAttribute('data-section');
+            document.getElementById(secId).classList.add('active');
+        });
+    });
+
+    // --- LOGIKA TWORZENIA SERWERA ---
+    function createNewServer() {
+        const name = document.getElementById('newSrvName').value;
+        const engine = document.getElementById('newSrvEngine').value;
+        const ver = document.getElementById('newSrvVer').value;
+        
+        if(!name) return alert("Podaj nazwę!");
+
+        const list = document.getElementById('srvList');
+        const id = Math.random().toString(36).substring(7);
+        const port = Math.floor(Math.random() * 100) + 25565;
+
+        const html = `
+            <div class="server-card">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-sm text-blue-400 font-mono">ID: ${id}</span>
+                    <span class="online p-1 rounded text-xs text-white"><div class="status-dot online"></div>RUNNING</span>
+                </div>
+                <h3 class="text-lg font-bold">${name}</h3>
+                <p class="text-gray-400 text-sm">Port: ${port} | Wersja: ${ver} (${engine})</p>
+                <div class="flex gap-2 mt-4">
+                    <button class="btn btn-red flex-1 text-xs" onclick="this.closest('.server-card').remove()">USUŃ</button>
+                    <button class="btn btn-blue flex-1 text-xs">RESTART</button>
+                </div>
+            </div>
+        `;
+        list.insertAdjacentHTML('afterbegin', html);
+        alert("Serwer został pomyślnie wdrożony w kontenerze!");
